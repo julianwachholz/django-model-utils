@@ -70,6 +70,12 @@ class StatusField(models.CharField):
         self._choices = [(0, 'dummy')]
         super(StatusField, self).contribute_to_class(cls, name)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(StatusField, self).deconstruct()
+        kwargs['no_check_for_status'] = not self.check_for_status
+        kwargs['choices_name'] = self.choices_name
+        return name, path, args, kwargs
+
 
 class MonitorField(models.DateTimeField):
     """
@@ -112,6 +118,12 @@ class MonitorField(models.DateTimeField):
                 setattr(model_instance, self.attname, value)
                 self._save_initial(model_instance.__class__, model_instance)
         return super(MonitorField, self).pre_save(model_instance, add)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(MonitorField, self).deconstruct()
+        kwargs['monitor'] = self.monitor
+        kwargs['when'] = self.when
+        return name, path, args, kwargs
 
 
 SPLIT_MARKER = getattr(settings, 'SPLIT_MARKER', '<!-- split -->')
@@ -216,6 +228,11 @@ class SplitField(models.TextField):
             return value.content
         except AttributeError:
             return value
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(SplitField, self).deconstruct()
+        kwargs['no_excerpt_field'] = not self.add_excerpt_field
+        return name, path, args, kwargs
 
 
 # allow South to handle these fields smoothly
